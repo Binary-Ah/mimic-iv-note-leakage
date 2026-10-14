@@ -1,0 +1,32 @@
+# MIMIC-IV data (PhysioNet DUA) — never commit
+data/
+*.csv
+*.csv.gz
+*.parquet
+*.pkl
+*.feather
+physionet.org/
+
+# model weights / caches
+bio_clinicalbert/
+*.pt
+*.pth
+*.bin
+*.safetensors
+.cache/
+
+# notebooks
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# os
+.DS_Store
+Thumbs.db
+desktop.ini
