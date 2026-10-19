@@ -26,15 +26,29 @@
 |---|---|---|
 | A 전체 텍스트 | 0.9995 | expired, deceased, died, time of death |
 | B 섹션 제거 | 0.9727 | unresponsive, failure, **comfort**(완화의료 — 암시적 유출), pleural |
-| C White-list 추출 | 0.9553 | **hypotension, intubated**, admission, history |
+| C White-list 추출 + 문장 필터링 | 0.9552 | **hypotension, intubated**, admission, history |
 
 B에서도 `comfort care` 같은 단어가 상위에 남아 **암시적 유출(implicit leakage)** 이 있음을 확인했고, C에서야 임상적으로 타당한 피처가 상위에 올라왔다. 성능이 떨어지는 것이 아니라 "모델이 무엇을 보고 판단하는지"가 바뀐 것이 핵심 결과.
+
+### 추가 실험: TF-IDF + Logistic Regression / Random Forest (`notebooks/03`)
+
+같은 사망 타겟으로 임베딩 대신 TF-IDF(1–2gram, 5,000 피처)를 써서 A/B 전처리를 비교한 실험도 함께 수행했다.
+(퇴원 요약지가 있는 입원 331,732건, train 265,385 / test 66,347)
+
+| 단계 | LR AUROC | RF AUROC |
+|---|---|---|
+| A 전체 텍스트 | 0.9995 | 0.9994 |
+| B 결과 관련 섹션(Hospital Course, Discharge *, Follow-up) 이후 제거 | 0.9727 | 0.9429 |
+
+표현 방식(TF-IDF vs Bio_ClinicalBERT)과 무관하게 전체 텍스트에서는 AUROC가 사실상 1에 가깝고, 결과 섹션을 지우면 떨어진다 —
+전처리 단계가 유출을 얼마나 막는지가 성능 수치를 좌우한다는 같은 결론.
 
 ## Repository layout
 ```
 notebooks/
   01_label_tfidf_rf_baseline.ipynb      # EDA, 30일 재입원 라벨 생성, TF-IDF(50) + RandomForest 베이스라인, Hospital Course 섹션 추출
   02_whitelist_clinicalbert_xgb.ipynb   # White-list 섹션 추출 → Bio_ClinicalBERT chunk 임베딩 → LR / XGBoost, 정형 데이터 Late Fusion
+  03_mortality_tfidf_lr_expA_expB.ipynb # 사망 타겟 TF-IDF + LR / RF, Exp A(전체) vs Exp B(결과 섹션 제거) — 연구실 GPU 서버 실행본
 docs/
   KSC2025_poster.png                    # 포스터
   KSC2025_paper_draft.pdf               # 논문 (초안 버전; 최종 제출본은 '학부생 논문_숭실대_이진아.pdf')
@@ -54,4 +68,3 @@ jupyter lab notebooks/
 
 ## Note
 - 같은 MIMIC-IV를 쓴 **심부전 30일 재입원 예측 팀프로젝트**는 별도 레포([mimic-iv-hf-readmission](https://github.com/Binary-Ah/mimic-iv-hf-readmission))이며 이 연구와 다른 작업이다.
-- 논문의 최종 A/B/C 비교 스크립트(사망 타겟, 329,940건 전체 실행)는 연구실 GPU 서버에서 실행한 버전이며 `CODE_TODO.md` 참고.
